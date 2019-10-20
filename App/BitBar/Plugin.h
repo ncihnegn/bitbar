@@ -22,7 +22,7 @@
 @property (nonatomic)     NSMenuItem *lastUpdatedMenuItem;
 @property (nonatomic)         NSDate *lastUpdated;
 @property (weak, readonly)   PluginManager *manager;
-
+@property (readonly)   NSMutableDictionary *environment;
 // UI
 @property (nonatomic) NSStatusItem *statusItem;
 

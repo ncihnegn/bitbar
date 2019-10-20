@@ -18,7 +18,8 @@
 
 @implementation Plugin
 
-- init { return (self = super.init) ? _currentLine = -1, _cycleLinesIntervalSeconds = 5, self : nil; }
+- init {
+  return (self = super.init) ? _currentLine = -1, _cycleLinesIntervalSeconds = 5, _environment = NSProcessInfo.processInfo.environment.mutableCopy, _environment[@"PATH"] = @"/usr/local/bin", self : nil; }
 
 - initWithManager:(PluginManager*)manager { return (self = self.init) ? _manager = manager, self : nil; }
 
@@ -149,13 +150,13 @@
   if (found.location == NSNotFound) return @{ @"title": line };
   NSString * title = [line substringToIndex:found.location];
   NSMutableDictionary * params = @{@"title":title}.mutableCopy;
-  
   // Find the parameters
   NSString * paramStr = [line substringFromIndex:found.location + found.length];
-
+  
   NSScanner* scanner = [NSScanner scannerWithString:paramStr];
   NSMutableCharacterSet* keyValueSeparator = [NSMutableCharacterSet characterSetWithCharactersInString:@"=:"];
   NSMutableCharacterSet* quoteSeparator = [NSMutableCharacterSet characterSetWithCharactersInString:@"\"'"];
+  
   
   while (![scanner isAtEnd]) {
     NSString *key = @""; NSString* value = @"";
@@ -201,6 +202,7 @@
     [(NSTask*)task setLaunchPath:params[@"bash"]];
     [(NSTask*)task setArguments:params[@"args"]];
     
+    ((NSTask*)task).environment = _environment;
     ((NSTask*)task).terminationHandler = ^(NSTask *task) {
       if (params[@"refresh"]) {
         [self performSelectorOnMainThread:@selector(performRefreshNow) withObject:NULL waitUntilDone:false];
